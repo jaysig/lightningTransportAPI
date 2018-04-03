@@ -20,26 +20,49 @@ const googleMapsClient = require('@google/maps').createClient({
 app.use(cors())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+let directions;
 
 app.get('/route/:token', (req, res) => {
-  const token = request.params.token;
-  res.send({ express: 'Hello From Express' });
+  const token = req.params.token;
+  if(directions.geocoded_waypoints) {
+    let leg = directions.routes[0].legs[0]
+    eCord = leg.end_location
+    sCord = leg.start_location
+    let directionResponse = {
+      "status": "success",
+      "path": [[sCord.lat, sCord.lng], [eCord.lat, eCord.lng]],
+      "total_distance": leg.distance.value,
+	    "total_time": leg.duration.value
+    }
+    res.send(directionResponse)
+  } else if (!directions) {
+    res.send({
+      "status": "failure",
+	    "error": "DIRECTIONS UNSET"
+    })
+  } else {
+    res.send({"status": "in progress"})
+  }
+
 });
 
 app.post('/route', function (req, res) {
-  if(req.body.directionRequest) {
-    let { origin, destination, travelMode } = req.body.directionRequest
-    let originCords = [origin.lat, origin.lng]
-    let destinationCords = [destination.lat, destination.lng]
-    let direction = { origin, destination}
-    googleMapsClient.directions(direction,function(err, response) {
-      if (!err) {
-        res.send(response.json)
-      } else {
-        console.log(err, 'failed');
-        res.send({ "error": "Invalid waypoints" })
-      }
-    })
+  if(req.body.length === 2){
+     let direction = { origin: req.body[0], destination: req.body[1]}
+      googleMapsClient.directions(direction,function(err, response) {
+        if (!err) {
+          directions = response.json
+          res.send({token: "axjl-123XL"})
+
+        } else {
+          console.log(err, 'failed');
+          res.send({ "error": "Invalid waypoints" })
+        }
+      })
+
+
+  } else {
+    res.send({error: "Please send a valid Direction Request"})
   }
 })
 
