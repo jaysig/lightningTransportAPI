@@ -48,6 +48,7 @@ app.get('/route/:token', (req, res) => {
 
 app.post('/route', function (req, res) {
   if(req.body.length === 2){
+    directions = "IN PROGRESS"
      let direction = { origin: req.body[0], destination: req.body[1]}
       googleMapsClient.directions(direction,function(err, response) {
         if (!err) {
