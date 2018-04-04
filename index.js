@@ -49,7 +49,7 @@ app.get('/route/:token', (req, res) => {
 app.post('/route', function (req, res) {
   if(req.body.length === 2){
     directions = "IN PROGRESS"
-     let direction = { origin: req.body[0], destination: req.body[1]}
+     let direction = { origin: req.body[0], destination: req.body[1], units: 'metric'}
       googleMapsClient.directions(direction,function(err, response) {
         if (!err) {
           directions = response.json
